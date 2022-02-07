@@ -1,30 +1,38 @@
-﻿namespace PasswordGeneratorOld.Models
+﻿namespace PasswordGenerator.Models
 {
     public class RequestModel
     {
-        public int Length { get; set; } = 16;
+        public int PasswordLength { get; set; }
 
-        public int Count { get; set; } = 1;
+        public int PasswordNumber { get; set; }
 
-        public int Numbers { get; set; } = 0;
+        public bool IsHaveNumericalCharacter { get; set; } = true;
 
-        public int UpperChars { get; set; } = 0;
+        public int MinimumNumberOfNumericalCharacter { get; set; } = 0;
 
-        public int LowerChars { get; set; } = 0;
+        public bool IsHaveUpperCaseLetter { get; set; } = true;
 
-        public int SpecialChars { get; set; } = 1;
+        public int MinimumNumberOfUpperCaseLetter { get; set; } = 0;
 
-        public string? MustHave { get; set; } = null;
+        public bool IsHaveLowerCaseLetter { get; set; } = true;
 
-        public string? StartsWith { get; set; } = null;
+        public int MinimumNumberOfLowerCaseLetter { get; set; }
 
-        public string? EndsWith { get; set; } = null;
+        public bool IsHaveSpecialCharacter { get; set; } = true ;
 
-        public string? Include { get; set; } = null;
+        public int MinimumNumberOfSpecialCharacter { get; set; } = 0;
 
-        public string? Exclude { get; set; } = null;
+        public string? MustHave { get; set; }
 
-        public string Type { get; set; } = "";
+        public string? MustStartsWith { get; set; }
+
+        public string? MustEndsWith { get; set; }
+
+        public string? CanContain { get; set; }
+
+        public string? CanNotContain { get; set; }
+
+        public string ReturnStyle { get; set; }
 
         public RequestModel Clone()
         {

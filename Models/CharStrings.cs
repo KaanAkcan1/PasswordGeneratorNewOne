@@ -1,4 +1,4 @@
-﻿namespace PasswordGeneratorOld.Models
+﻿namespace PasswordGenerator.Models
 {
     public class CharStrings
     {

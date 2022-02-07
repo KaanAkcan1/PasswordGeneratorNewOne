@@ -1,7 +1,9 @@
-﻿using PasswordGeneratorOld.Models;
+﻿
+
+using PasswordGenerator.Models;
 using System.Globalization;
 
-namespace PasswordGeneratorOld.Services
+namespace PasswordGenerator.Services
 {
     public class PasswordGenerateService
     {
@@ -13,14 +15,14 @@ namespace PasswordGeneratorOld.Services
             {
 
                 request = ControlOfMustConditions(request);
-                request.Length = PasswordLengthOrganizer(request);
-                if (request.Length < 0)
+                request.PasswordLength = PasswordLengthOrganizer(request);
+                if (request.PasswordLength < 0)
                     request = MinimalizeRequest(request);
 
 
                 var passwordList = new List<string>();
 
-                for (var j = 1; j <= request.Count; j++)
+                for (var j = 1; j <= request.PasswordNumber; j++)
                 {
                     var password = GeneratePassword(request);
                     passwordList.Add(password);
@@ -47,9 +49,9 @@ namespace PasswordGeneratorOld.Services
             var number = "0123456789";
             var specials = ".:-_@%&=;,*/+";
 
-            if (request.Include != null)
+            if (request.CanContain != null)
             {
-                foreach (var item in request.Include)
+                foreach (var item in request.CanContain)
                 {
                     if (Char.IsDigit(item))
                     {
@@ -77,9 +79,9 @@ namespace PasswordGeneratorOld.Services
                 }
 
             }
-            if (request.Exclude != null)
+            if (request.CanNotContain != null)
             {
-                foreach (var item in request.Exclude)
+                foreach (var item in request.CanNotContain)
                 {
                     if (Char.IsDigit(item))
                     {
@@ -117,95 +119,138 @@ namespace PasswordGeneratorOld.Services
 
         }
 
-        //Düzenlenecek
+
         public RequestModel MinimalizeRequest(RequestModel request)
         {
-            if (request.Length < 0)
+            if (request.PasswordLength < 0)
             {
-                if (request.LowerChars > 0 ||
-                        request.Numbers > 0 ||
-                        request.SpecialChars > 0 ||
-                        request.UpperChars > 0)
+                if (request.MinimumNumberOfLowerCaseLetter > 0 ||
+                        request.MinimumNumberOfNumericalCharacter > 0 ||
+                        request.MinimumNumberOfSpecialCharacter > 0 ||
+                        request.MinimumNumberOfUpperCaseLetter > 0)
                 {
-                    var total = request.Length +
-                        request.LowerChars  +
-                        request.UpperChars +
-                        request.SpecialChars +
-                        request.Numbers ;
+                    var total = request.PasswordLength +
+                        (request.IsHaveLowerCaseLetter ? request.MinimumNumberOfLowerCaseLetter : 0) +
+                        (request.IsHaveUpperCaseLetter ? request.MinimumNumberOfUpperCaseLetter : 0) +
+                        (request.IsHaveSpecialCharacter ? request.MinimumNumberOfSpecialCharacter : 0) +
+                        (request.IsHaveNumericalCharacter ? request.MinimumNumberOfNumericalCharacter : 0) ;
 
                     if (total < 0)
                     {
-                        request.Length = total;
-                        request.LowerChars = 0;
-                        request.Numbers = 0;
-                        request.SpecialChars = 0;
-                        request.UpperChars = 0;
+                        request.PasswordLength = total;
+                        request.MinimumNumberOfLowerCaseLetter = 0;
+                        request.MinimumNumberOfNumericalCharacter = 0;
+                        request.MinimumNumberOfSpecialCharacter = 0;
+                        request.MinimumNumberOfUpperCaseLetter = 0;
                     }
                     else
                     {
                         var random = new Random();
-                        var option = random.Next(0, 3);
+                        var option = random.Next(0, 4);
                         switch (option)
                         {
                             case 0:
-                                    if (request.UpperChars > 0)
+                                if (request.IsHaveUpperCaseLetter)
+                                    if (request.MinimumNumberOfUpperCaseLetter > 0)
                                     {
-                                        request.UpperChars--;
-                                        request.Length++;
+                                        request.MinimumNumberOfUpperCaseLetter--;
+                                        request.PasswordLength++;
                                     }
                                 break;
-                            case 1:                                
-                                    if (request.LowerChars > 0)
+                            case 1:
+                                if (request.IsHaveLowerCaseLetter)
+                                    if (request.MinimumNumberOfLowerCaseLetter > 0)
                                     {
-                                        request.LowerChars--;
-                                        request.Length++;
+                                        request.MinimumNumberOfLowerCaseLetter--;
+                                        request.PasswordLength++;
                                     }
                                 break;
-                            case 2:                                
-                                    if (request.SpecialChars > 0)
+                            case 2:
+                                if (request.IsHaveSpecialCharacter)
+                                    if (request.MinimumNumberOfSpecialCharacter > 0)
                                     {
-                                        request.SpecialChars--;
-                                        request.Length++;
+                                        request.MinimumNumberOfSpecialCharacter--;
+                                        request.PasswordLength++;
                                     }
                                 break;
-                            case 3:                                
-                                    if (request.Numbers > 0)
+                            case 3:
+                                if (request.IsHaveNumericalCharacter)
+                                    if (request.MinimumNumberOfNumericalCharacter > 0)
                                     {
-                                        request.Numbers--;
-                                        request.Length++;
+                                        request.MinimumNumberOfNumericalCharacter--;
+                                        request.PasswordLength++;
                                     }
                                 break;
                         }
-                    } 
-                    if (request.Length < 0)
+
+                    }
+                    
+                    
+
+                    //if (request.IsHaveUpperCaseLetter)
+                    //{
+                    //    if (request.MinimumNumberOfUpperCaseLetter > 0)
+                    //    {
+                    //        request.MinimumNumberOfUpperCaseLetter--;
+                    //        request.PasswordLength++;
+                    //    }
+                    //}
+                    //if (request.IsHaveLowerCaseLetter)
+                    //{
+                    //    if (request.MinimumNumberOfLowerCaseLetter > 0)
+                    //    {
+                    //        request.MinimumNumberOfLowerCaseLetter--;
+                    //        request.PasswordLength++;
+                    //    }
+                    //}
+                    //if (request.IsHaveSpecialCharacter)
+                    //{
+                    //    if (request.MinimumNumberOfSpecialCharacter > 0)
+                    //    {
+                    //        request.MinimumNumberOfSpecialCharacter--;
+                    //        request.PasswordLength++;
+                    //    }
+                    //}
+                    //if (request.IsHaveNumericalCharacter)
+                    //{
+                    //    if (request.MinimumNumberOfNumericalCharacter > 0)
+                    //    {
+                    //        request.MinimumNumberOfNumericalCharacter--;
+                    //        request.PasswordLength++;
+                    //    }
+                    //}
+
+
+                    if (request.PasswordLength < 0)
                         request = MinimalizeRequest(request);
+
                 }
 
-                if (request.Length < 0)
+                if (request.PasswordLength < 0)
                 {
-                    if(request.StartsWith !=null)
+                    if(request.MustStartsWith !=null)
                     { 
-                        var length = request.StartsWith.Length;                    
-                        request.StartsWith = null;
-                        request.Length = request.Length + length;
+                        var length = request.MustStartsWith.Length;                    
+                        request.MustStartsWith = null;
+                        request.PasswordLength = request.PasswordLength + length;
                     }
                 }
-                if (request.Length < 0)
+                if (request.PasswordLength < 0)
                 {
-                    if(request.EndsWith != null)
+                    if(request.MustEndsWith != null)
                     {
-                        var length = request.EndsWith.Length;
-                        request.EndsWith = null;
-                        request.Length = request.Length + length;
+                        var length = request.MustEndsWith.Length;
+                        request.MustEndsWith = null;
+                        request.PasswordLength = request.PasswordLength + length;
                     }
                 }
-                if (request.Length < 0)
+                if (request.PasswordLength < 0)
                 {
                     if(request.MustHave != null)
                     {
                         var length = request.MustHave.Length;
                         request.MustHave = null;
-                        request.Length = request.Length + length;
+                        request.PasswordLength = request.PasswordLength + length;
                     }
                 }
             }
@@ -215,75 +260,104 @@ namespace PasswordGeneratorOld.Services
 
         public int PasswordLengthOrganizer(RequestModel request)
         {
-            var passwordLength = request.Length;
+            var passwordLength = request.PasswordLength;
 
-            if (request.StartsWith != null)
-                passwordLength = passwordLength - request.StartsWith.Length;
-            if (request.EndsWith != null)
-                passwordLength = passwordLength - request.EndsWith.Length;
+            if (request.MustStartsWith != null)
+                passwordLength = passwordLength - request.MustStartsWith.Length;
+            if (request.MustEndsWith != null)
+                passwordLength = passwordLength - request.MustEndsWith.Length;
             if (request.MustHave != null)
                 passwordLength = passwordLength - request.MustHave.Length;
 
-            var charNumber = request.LowerChars + request.UpperChars
-            + request.SpecialChars + request.Numbers;
+            var charNumber = request.IsHaveLowerCaseLetter ? request.MinimumNumberOfLowerCaseLetter : 0;
+            charNumber = charNumber + (request.IsHaveUpperCaseLetter ? request.MinimumNumberOfUpperCaseLetter : 0);
+            charNumber = charNumber + (request.IsHaveSpecialCharacter ? request.MinimumNumberOfSpecialCharacter : 0);
+            charNumber = charNumber + (request.IsHaveNumericalCharacter ? request.MinimumNumberOfNumericalCharacter : 0);
             if(charNumber > passwordLength)
                 passwordLength = passwordLength - charNumber;
 
             return passwordLength;
         }
 
-        //Düzenlenecek
-        public RequestModel OrganizeRequest(RequestModel request)
+
+        public RequestModel OrganizeMinumumNumbers(RequestModel request)
         {
             var length = 0;
-            length = length + request.UpperChars + request.LowerChars + request.SpecialChars + request.Numbers;
-
-            if (length < request.Length)
-            {                
-                var random = new Random();
-                var option = random.Next(0, 3);
-                switch (option)
-                {
-                    case 0:                        
-                        request.UpperChars++;
-                        break;
-                    case 1:                        
-                        request.LowerChars++;
-                        break;
-                    case 2:                        
-                        request.Numbers++;
-                        break;
-                    case 3:
-                        if (request.Length / 10 > request.SpecialChars)
-                            request.SpecialChars++;
-                        break;
-                }
-                request = OrganizeRequest(request);
-            }
-            else if(length> request.Length && request.Length != 0)
+            if (request.IsHaveUpperCaseLetter)
+                length = length + request.MinimumNumberOfUpperCaseLetter;
+            if (request.IsHaveLowerCaseLetter)
+                length = length + request.MinimumNumberOfLowerCaseLetter;
+            if (request.IsHaveSpecialCharacter)
+                length = length + request.MinimumNumberOfSpecialCharacter;
+            if (request.IsHaveNumericalCharacter)
+                length = length + request.MinimumNumberOfNumericalCharacter;
+            if (length < request.PasswordLength)
             {
+                if(request.IsHaveLowerCaseLetter == false &&
+                    request.IsHaveUpperCaseLetter == false &&
+                    request.IsHaveNumericalCharacter == false &&
+                    request.IsHaveSpecialCharacter == false)
+                {
+                    request.IsHaveSpecialCharacter = true;
+                    request.IsHaveUpperCaseLetter = true;
+                    request.IsHaveNumericalCharacter = true;
+                    request.IsHaveLowerCaseLetter = true;
+                }
                 var random = new Random();
-                var option = random.Next(0, 3);
+                var option = random.Next(0, 4);
                 switch (option)
                 {
-                    case 0:                        
-                        if (request.UpperChars > 0)
-                            request.UpperChars--;
+                    case 0:
+                        if (request.IsHaveUpperCaseLetter)
+                            request.MinimumNumberOfUpperCaseLetter++;
                         break;
-                    case 1:                        
-                        if (request.LowerChars > 0)
-                            request.LowerChars--;
+                    case 1:
+                        if (request.IsHaveLowerCaseLetter)
+                            request.MinimumNumberOfLowerCaseLetter++;
                         break;
                     case 2:
-                         if (request.Numbers > 0)
-                             request.Numbers--;
+                        if (request.IsHaveSpecialCharacter)
+                            request.MinimumNumberOfSpecialCharacter++;
                         break;
                     case 3:
-                        if (request.Length / 10 < request.SpecialChars && request.SpecialChars > 0)
-                            request.SpecialChars--;
+                        if (request.IsHaveNumericalCharacter)
+                            request.MinimumNumberOfNumericalCharacter++;
+                        break;
+
+                    default:
                         break;
                 }
-                request =OrganizeRequest(request);
+
+                request = OrganizeMinumumNumbers(request);
+            }
+            else if(length> request.PasswordLength && request.PasswordLength != 0)
+            {
+                var random = new Random();
+                var option = random.Next(0, 4);
+                switch (option)
+                {
+                    case 0:
+                        if (request.IsHaveUpperCaseLetter)
+                            if (request.MinimumNumberOfUpperCaseLetter > 0)
+                                request.MinimumNumberOfUpperCaseLetter--;
+                        break;
+                    case 1:
+                        if (request.IsHaveLowerCaseLetter)
+                            if (request.MinimumNumberOfLowerCaseLetter > 0)
+                                request.MinimumNumberOfLowerCaseLetter--;
+                        break;
+                    case 2:
+                        if (request.IsHaveSpecialCharacter)
+                            if (request.MinimumNumberOfSpecialCharacter > 0)
+                                request.MinimumNumberOfSpecialCharacter--;
+                        break;
+                    case 3:
+                        if (request.IsHaveNumericalCharacter)
+                            if (request.MinimumNumberOfNumericalCharacter > 0)
+                                request.MinimumNumberOfNumericalCharacter--;
+                        break;
+                }
+                request =OrganizeMinumumNumbers(request);
             }
             return request;
         }
@@ -291,14 +365,14 @@ namespace PasswordGeneratorOld.Services
 
         public RequestModel ControlOfMustConditions(RequestModel request)
         {
-            if (request.Exclude != null)
+            if (request.CanNotContain != null)
             {
-                foreach (var item in request.Exclude)
+                foreach (var item in request.CanNotContain)
                 {
-                    if (request.StartsWith != null)
+                    if (request.MustStartsWith != null)
                     {
-                        if (request.StartsWith.IndexOf(item) != -1)                        
-                            request.StartsWith = null;
+                        if (request.MustStartsWith.IndexOf(item) != -1)                        
+                            request.MustStartsWith = null;
                                                   
                     }
                     if (request.MustHave != null)
@@ -306,10 +380,10 @@ namespace PasswordGeneratorOld.Services
                         if (request.MustHave.IndexOf(item) != -1)
                             request.MustHave = null;
                     }
-                    if (request.EndsWith != null)
+                    if (request.MustEndsWith != null)
                     {
-                        if (request.EndsWith.IndexOf(item) != -1)
-                            request.EndsWith = null;
+                        if (request.MustEndsWith.IndexOf(item) != -1)
+                            request.MustEndsWith = null;
                     }
                 }
             }
@@ -329,35 +403,35 @@ namespace PasswordGeneratorOld.Services
             var response = "";
             var random = new Random();
 
-            request = OrganizeRequest(request);
+            request = OrganizeMinumumNumbers(request);
 
-            if (request.UpperChars > 0)
+            if (request.IsHaveUpperCaseLetter == true)
             {
-                for (var i = 1; i <= request.UpperChars; i++)
+                for (var i = 1; i <= request.MinimumNumberOfUpperCaseLetter; i++)
                     response = response.Insert(
                         random.Next(response.Length),
                         uppers[random.Next(uppers.Length - 1)].ToString(CultureInfo.InvariantCulture)
                     );
             }
-            if (request.LowerChars >0)
+            if (request.IsHaveLowerCaseLetter == true)
             {
-                for (var i = 1; i <= request.LowerChars; i++)
+                for (var i = 1; i <= request.MinimumNumberOfLowerCaseLetter; i++)
                     response = response.Insert(
                         random.Next(response.Length),
                         lowers[random.Next(lowers.Length - 1)].ToString(CultureInfo.InvariantCulture)
                     );
             }
-            if (request.SpecialChars > 0)
+            if (request.IsHaveSpecialCharacter == true)
             {
-                for (var i = 1; i <= request.SpecialChars; i++)
+                for (var i = 1; i <= request.MinimumNumberOfSpecialCharacter; i++)
                     response = response.Insert(
                         random.Next(response.Length),
                         specials[random.Next(specials.Length - 1)].ToString(CultureInfo.InvariantCulture)
                     );
             }
-            if (request.Numbers > 0)
+            if (request.IsHaveNumericalCharacter == true)
             {
-                for (var i = 1; i <= request.Numbers; i++)
+                for (var i = 1; i <= request.MinimumNumberOfNumericalCharacter; i++)
                     response = response.Insert(
                         random.Next(response.Length),
                         number[random.Next(number.Length - 1)].ToString(CultureInfo.InvariantCulture)
@@ -368,50 +442,15 @@ namespace PasswordGeneratorOld.Services
             if (request.MustHave != null)
                 response = response.Insert(
                         random.Next(response.Length), request.MustHave);
-            if (request.StartsWith != null)
-                response = response.Insert(0, request.StartsWith);
-            if (request.EndsWith != null)
-                response = response.Insert(response.Length, request.EndsWith);
+            if (request.MustStartsWith != null)
+                response = response.Insert(0, request.MustStartsWith);
+            if (request.MustEndsWith != null)
+                response = response.Insert(response.Length, request.MustEndsWith);
 
 
             return response;
         }
 
-        public int? RequestCheck(string? word)
-        {
-            int? response;            
-            try
-            {
-                response = Convert.ToInt32(word);
-                if (response > 1000)
-                    response = 1000;
-            }
-            catch (Exception)
-            {
-                response = null;
-            }
-            if(word == null) 
-                response = null;
-            return response;
-        }
-        public RequestModel PostRequestCheck(FirstRequestModel request)
-        {
-            var response = new RequestModel()
-            {
-                Length = (RequestCheck(request.Length) == null) ? 16 : (int)RequestCheck(request.Length),
-                Count = (RequestCheck(request.Count) == null) ? 1 : (int)RequestCheck(request.Count),
-                Numbers = (RequestCheck(request.Numbers) == null) ? 0 : (int)RequestCheck(request.Numbers),
-                UpperChars = (RequestCheck(request.UpperChars) == null) ? 0 : (int)RequestCheck(request.UpperChars),
-                LowerChars = (RequestCheck(request.LowerChars) == null) ? 0 : (int)RequestCheck(request.LowerChars),
-                SpecialChars = (RequestCheck(request.SpecialChars) == null) ? 1 : (int)RequestCheck(request.SpecialChars),
-                MustHave = request.MustHave,
-                StartsWith = request.StartsWith,
-                EndsWith = request.EndsWith,
-                Include = request.Include,
-                Exclude = request.Exclude,
-                Type = request.Type
-            };
-            return response;
-        }
+
     }
 }
